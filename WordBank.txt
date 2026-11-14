@@ -1,0 +1,7 @@
+Python
+Java
+Ruby
+Kernal
+Graphics
+Memory
+Storage
