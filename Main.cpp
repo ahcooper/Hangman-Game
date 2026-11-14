@@ -1,3 +1,4 @@
+#include <cctype>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -77,6 +78,27 @@ void difficultyMenu(int& diff)
     checkBigInput(diff);
 }
 
+void displayCurrentWord(string& displayWord)
+{
+    for (char letter : displayWord)
+    {
+        std::cout << letter << ' ';
+    }
+    std::cout << endl;
+}
+
+void checkWord(string& secretWord, string& displayWord, char& guess)
+{
+    for (int j = 0; j < secretWord.length(); j++)
+    {
+        if (secretWord[j] == guess)
+        {
+            displayWord[j] = guess;
+        }
+    }
+
+}
+
 int main()
 {
 
@@ -85,10 +107,16 @@ int main()
     string secretWord;
     string displayWord;
     int diff = 0;
+    char guess;
 
     srand(time(nullptr));
 
     std::ifstream is("WordBank.txt");
+    if (!is)
+    {
+        cout << "Unable to open WordBank.txt\n";
+        return 1;
+    }
     std::istream_iterator<string> start(is), end;
     std::vector<string> wordBank(start, end);
 
@@ -96,18 +124,36 @@ int main()
     {
         clearScreen();
         getMenu(choice);
-
+        clearScreen();
         switch (choice)
         {
         case 1:
             //std::cout << "STuff\n";
             difficultyMenu(diff);
+            clearScreen();
             secretWord = selectWord(wordBank);
             displayWord = string(secretWord.length(), '_');
-            std::cout << secretWord << endl;
-            std::cout << displayWord << endl;
+            //std::cout << secretWord << endl;
+            //std::cout << displayWord << endl;
+            while (displayWord != secretWord)
+            {
+                displayCurrentWord(displayWord);
 
-            break;
+                std::cout << "Please guess a letter: ";
+                std::cin >> guess;
+
+                guess = std::tolower(guess);
+
+                //std::cout << "You guessed: " << guess << '\n';
+
+                checkWord(secretWord, displayWord, guess);
+            }
+            std::cout << "----------------------------\n";
+            std::cout << "======== YOU WIN!!! ========\n";
+            std::cout << "You guessed " << secretWord << endl;
+            std::cout << "----------------------------\n";
+
+           break;
 
         case 2:
             std::cout << "Thank you for playing. Goodbye :)\n";

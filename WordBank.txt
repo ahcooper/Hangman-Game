@@ -1,7 +1,8 @@
-Python
-Java
-Ruby
-Kernal
-Graphics
-Memory
-Storage
+python
+java
+ruby
+kernal
+graphics
+memory
+storage
+beacon
