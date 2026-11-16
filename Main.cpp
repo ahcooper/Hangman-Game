@@ -16,7 +16,7 @@ void checkInput(int& i)
     {
         std::cin.clear();
         std::cin.ignore(1000, '\n');
-        std::cout << "Invalid choice. Please enter 1 or 2: ";
+        std::cout << "Invalid choice. Please enter 1 or 2: \n";
     }
 }
 
@@ -26,7 +26,7 @@ void checkBigInput(int& i)
     {
         std::cin.clear();
         std::cin.ignore(1000, '\n');
-        std::cout << "Invalid choice. Please enter 1 through 3: ";
+        std::cout << "Invalid choice. Please enter 1 through 3: \n";
     }
 }
 
@@ -58,7 +58,7 @@ void anotherGame(int& playAgain)
 
 }
 
-string selectWord(vector<string>& words)
+string selectWord(const vector<string>& words)
 {
     int randomIndex = rand() % words.size();
         
@@ -78,7 +78,7 @@ void difficultyMenu(int& diff)
     checkBigInput(diff);
 }
 
-void displayCurrentWord(string& displayWord)
+void displayCurrentWord(const string& displayWord)
 {
     for (char letter : displayWord)
     {
@@ -87,17 +87,55 @@ void displayCurrentWord(string& displayWord)
     std::cout << endl;
 }
 
-void checkWord(string& secretWord, string& displayWord, char& guess)
+bool checkWord(const string& secretWord, string& displayWord, char guess)
 {
-    for (int j = 0; j < secretWord.length(); j++)
+    bool found=false;
+
+    for (size_t j = 0; j < secretWord.length(); j++)
     {
         if (secretWord[j] == guess)
         {
             displayWord[j] = guess;
+            found = true;
         }
     }
+    return found;
 
 }
+
+void checkGuess(char& guess)
+{
+   //char previousGuess;
+    while (!(std::cin >> guess) || !isalpha(guess))
+    {
+        std::cin.clear();
+        std::cin.ignore(1000, '\n');
+        std::cout << "Invalid choice. Please guess a letter!  \n";
+    }
+
+    //if(guess==previousGuess)
+    
+
+}
+
+int getGuessCount(int diff)
+{
+    switch (diff)
+    {
+    case 1:
+        return 10;
+
+    case 2:
+        return 6;
+
+    case 3:
+        return 4;
+
+    default:
+        return 6;
+    }
+}
+
 
 int main()
 {
@@ -108,6 +146,7 @@ int main()
     string displayWord;
     int diff = 0;
     char guess;
+    int guessesRemaining = 0;
 
     srand(time(nullptr));
 
@@ -130,23 +169,35 @@ int main()
         case 1:
             //std::cout << "STuff\n";
             difficultyMenu(diff);
+            guessesRemaining = getGuessCount(diff);
             clearScreen();
             secretWord = selectWord(wordBank);
             displayWord = string(secretWord.length(), '_');
             //std::cout << secretWord << endl;
             //std::cout << displayWord << endl;
-            while (displayWord != secretWord)
+            while (displayWord != secretWord || guessesRemaining > 0)
             {
+                
+                clearScreen();
                 displayCurrentWord(displayWord);
 
+                cout << "Guesses Remaining: "
+                    << guessesRemaining
+                    << endl;
                 std::cout << "Please guess a letter: ";
-                std::cin >> guess;
+                checkGuess(guess);
 
                 guess = std::tolower(guess);
 
-                //std::cout << "You guessed: " << guess << '\n';
+                std::cout << "You guessed: " << guess << '\n';
 
-                checkWord(secretWord, displayWord, guess);
+                bool correct = checkWord(secretWord, displayWord, guess);
+
+                if (!correct)
+                {
+                    guessesRemaining--;
+                }
+
             }
             std::cout << "----------------------------\n";
             std::cout << "======== YOU WIN!!! ========\n";
@@ -170,3 +221,16 @@ int main()
         }
     }    
 }
+
+//==========================
+//== Things I need to add ==
+//==========================
+/*
+
+* Implement difficulty settings
+* Add guess counter
+* Save and display guessed letters
+* Add losing condition
+* Add beacon condition
+* Remove commented-out debug code
+*/
