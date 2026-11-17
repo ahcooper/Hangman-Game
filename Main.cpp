@@ -20,17 +20,17 @@ void checkInput(int& i)
     }
 }
 
-void checkBigInput(int& i)
+void validateDiff(int& i)
 {
-    while (!(std::cin >> i) || i < 1 || i > 3)
+    while (!(std::cin >> i) || i < 1 || i > 4)
     {
         std::cin.clear();
         std::cin.ignore(1000, '\n');
-        std::cout << "Invalid choice. Please enter 1 through 3: \n";
+        std::cout << "Invalid choice. Please enter 1 through 4: \n";
     }
 }
 
-void getMenu(int& choice)
+void showMenu(int& choice)
 {
     std::cout << "------------------------------------\n";
     std::cout << "======== Welcome To Hangman ========\n";
@@ -39,8 +39,7 @@ void getMenu(int& choice)
     std::cout << "1) New Game\n";
     std::cout << "2) Exit\n";
     
-    checkInput(choice);
-    
+    checkInput(choice);  
 }
 
 void clearScreen()
@@ -55,7 +54,6 @@ void anotherGame(int& playAgain)
     std::cout << "2) No\n";
 
     checkInput(playAgain);
-
 }
 
 string selectWord(const vector<string>& words)
@@ -65,7 +63,7 @@ string selectWord(const vector<string>& words)
     return words[randomIndex];
 }
 
-void difficultyMenu(int& diff)
+void showDifficultyMenu(int& diff)
 {
     std::cout << "---------------------------------\n";
     std::cout << "======== DIFFICULTY MENU ========\n";
@@ -74,8 +72,9 @@ void difficultyMenu(int& diff)
     std::cout << "1. Easy (10 Guesses)\n";
     std::cout << "2. Normal (6 Guesses)\n";
     std::cout << "3. Hard (4 Guesses)\n";
+    std::cout << "4. Back\n";
 
-    checkBigInput(diff);
+    validateDiff(diff);
 }
 
 void displayCurrentWord(const string& displayWord)
@@ -100,22 +99,16 @@ bool checkWord(const string& secretWord, string& displayWord, char guess)
         }
     }
     return found;
-
 }
 
 void checkGuess(char& guess)
 {
-   //char previousGuess;
     while (!(std::cin >> guess) || !isalpha(guess))
     {
         std::cin.clear();
         std::cin.ignore(1000, '\n');
         std::cout << "Invalid choice. Please guess a letter!  \n";
-    }
-
-    //if(guess==previousGuess)
-    
-
+    }        
 }
 
 int getGuessCount(int diff)
@@ -136,10 +129,43 @@ int getGuessCount(int diff)
     }
 }
 
+bool isLetterAlreadyGuessed(const vector<char>& guessedLetters, char guess)
+{
+    for (size_t i = 0; i < guessedLetters.size(); i++)
+    {
+        if (guessedLetters[i] == guess)
+        {           
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void displayAlphabetBoard(const vector<char>& guessedLetters)
+{
+    for (char letter = 'A'; letter <= 'Z'; letter++)
+    {
+        if (isLetterAlreadyGuessed(guessedLetters,
+            std::tolower(letter)))
+        {
+            std::cout << "- ";
+        }
+        else
+        {
+            std::cout << letter << " ";
+        }
+
+        if (letter == 'M')
+        {
+            std::cout << '\n';
+        }
+    }
+    std::cout << '\n';
+}
 
 int main()
 {
-
     int choice = 0;
     int playAgain = 0;
     string secretWord;
@@ -147,6 +173,7 @@ int main()
     int diff = 0;
     char guess;
     int guessesRemaining = 0;
+    vector<char>guessedLetters;
 
     srand(time(nullptr));
 
@@ -159,52 +186,77 @@ int main()
     std::istream_iterator<string> start(is), end;
     std::vector<string> wordBank(start, end);
 
+    showMenu(choice);
+
     while (true)
     {
         clearScreen();
-        getMenu(choice);
-        clearScreen();
+       
         switch (choice)
         {
         case 1:
-            //std::cout << "STuff\n";
-            difficultyMenu(diff);
+            
+            showDifficultyMenu(diff);
+            if (diff == 4)
+            {
+                showMenu(choice);
+                continue;
+            }
+
             guessesRemaining = getGuessCount(diff);
             clearScreen();
             secretWord = selectWord(wordBank);
             displayWord = string(secretWord.length(), '_');
-            //std::cout << secretWord << endl;
-            //std::cout << displayWord << endl;
-            while (displayWord != secretWord || guessesRemaining > 0)
-            {
-                
-                clearScreen();
+            
+            while (displayWord != secretWord && guessesRemaining > 0)
+            {                          
                 displayCurrentWord(displayWord);
+                displayAlphabetBoard(guessedLetters);
 
-                cout << "Guesses Remaining: "
-                    << guessesRemaining
-                    << endl;
+                std::cout << "Guesses Remaining: " << guessesRemaining << endl;
                 std::cout << "Please guess a letter: ";
                 checkGuess(guess);
-
+                clearScreen();
                 guess = std::tolower(guess);
 
-                std::cout << "You guessed: " << guess << '\n';
-
-                bool correct = checkWord(secretWord, displayWord, guess);
-
-                if (!correct)
+                if (!isLetterAlreadyGuessed(guessedLetters, guess))
                 {
-                    guessesRemaining--;
+                    guessedLetters.push_back(guess);
+
+                    bool correct = checkWord(secretWord, displayWord, guess);
+
+                    if (!correct)
+                    {   
+                        guessesRemaining--;
+                    }
+                
+                }
+                else 
+                {
+                    std::cout << "Already guessed letter. Please guess a different letter.\n";
                 }
 
-            }
-            std::cout << "----------------------------\n";
-            std::cout << "======== YOU WIN!!! ========\n";
-            std::cout << "You guessed " << secretWord << endl;
-            std::cout << "----------------------------\n";
+                
 
-           break;
+            }
+            
+            if (displayWord == secretWord)
+            {
+                std::cout << "----------------------------\n";
+                std::cout << "======== YOU WIN!!! ========\n";
+                std::cout << "Your word was " << secretWord << endl;
+                std::cout << "----------------------------\n";
+            }
+            else
+            {
+                std::cout << "----------------------------\n";
+                std::cout << "======== YOU Lose!!! ========\n";
+                std::cout << "Your word was " << secretWord << endl;
+                std::cout << "----------------------------\n";
+            }
+
+            guessedLetters.clear();
+            break;
 
         case 2:
             std::cout << "Thank you for playing. Goodbye :)\n";
@@ -226,11 +278,6 @@ int main()
 //== Things I need to add ==
 //==========================
 /*
-
-* Implement difficulty settings
-* Add guess counter
-* Save and display guessed letters
-* Add losing condition
 * Add beacon condition
 * Remove commented-out debug code
 */
