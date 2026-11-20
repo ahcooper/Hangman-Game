@@ -1,4 +1,5 @@
 Hangman
+
 A console-based Hangman game written in C++ that features multiple difficulty levels, input validation, duplicate guess prevention, an alphabet tracker, and a hidden Meridia's Beacon easter egg.
 
 Features
